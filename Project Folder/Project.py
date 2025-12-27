@@ -75,14 +75,12 @@ class Gift:
     def draw(self):
         window.blit(self.image, self.rect)
 
-
 class Enemy:
     def __init__(self, x, speed):
         self.image = snowball_image
         self.rect = pygame.Rect(x, -40, 120, 120)
         self.speed = speed
         self.mask = pygame.mask.from_surface(self.image)
-
 
     def update(self):
         self.rect.y += self.speed
@@ -102,7 +100,6 @@ class Candy:
 
     def draw(self):
         window.blit(self.image, self.rect)
-
 
 background = pygame.image.load("christmasBG.jpg").convert()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
@@ -168,8 +165,6 @@ while running:
             text_y += 30
             # This is for the instruction lines to fit on screen
         pygame.display.update()
-
-
 
     clock.tick(60)
 
