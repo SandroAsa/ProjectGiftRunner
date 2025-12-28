@@ -126,6 +126,7 @@ score = 0
 startup = True
 running = True
 music_off = False
+paused = False
 
 active_speed_buff = False
 active_points_buff = False
@@ -154,6 +155,8 @@ while running:
         instruction_lines = [
             "In this game, your job is to catch Santa's gifts and avoid Snowballs.",
             "There are rare Candy Canes that give you Slow-Motion or Points Buffs.",
+            "You can pause the game whenever you want by pressing M.",
+            "But be careful, Buff time still goes while paused!",
             "The game gets faster as you play.",
             "Press Space to start!"
         ]
@@ -171,8 +174,18 @@ while running:
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             running = False
+        if e.type == pygame.KEYDOWN:
+            if e.key == pygame.K_m:
+                paused = not paused
+                if paused:
+                    paused_start = pygame.time.get_ticks()
+                    pygame.mixer.music.pause()
+                if not paused:
+                    paused_end = pygame.time.get_ticks() - paused_start
+                    ticks += paused_end
+                    pygame.mixer.music.unpause()
 
-    if not game_over:
+    if not paused and not game_over:
         if not music_off:
             pygame.mixer.music.load("Jingle Bell.mp3")
             pygame.mixer.music.play(-1)
@@ -238,7 +251,6 @@ while running:
                 pygame.mixer.Sound("eating_candycane.wav").play()
                 now = pygame.time.get_ticks()
                 chosen_buff = random.choice(['speed', 'points'])
-
                 if chosen_buff == 'speed':
                     if active_speed_buff:
                         speed_buff_end += buff_duration
@@ -273,13 +285,16 @@ while running:
             active_points_buff = False
             points_multiplier = 1
 
-    secs = (pygame.time.get_ticks() - ticks) // 1000
-    time_text = font.render(f"Time: {secs}", True, (255, 255, 255))
-    time_text.set_alpha(175)
-    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
-    score_text.set_alpha(175)
+        secs = (pygame.time.get_ticks() - ticks) // 1000
+        time_text = font.render(f"Time: {secs}", True, (255, 255, 255))
+        time_text.set_alpha(175)
+        score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+        score_text.set_alpha(175)
 
     window.blit(background, (0, 0))
+    if paused:
+        paused_text = font.render("Gameplay Paused. Press M to Continue.", True, (0, 0, 0))
+        window.blit(paused_text, (400 - paused_text.get_width()/2, 300))
     player.draw()
     window.blit(time_text, (10, 10))
     window.blit(score_text, (10, 50))
@@ -304,7 +319,6 @@ while running:
         if seconds_left < 0:
             seconds_left = 0
         window.blit(font.render("2X Points Buff: " + str(seconds_left) + "s", True, (255, 255, 0)), (10, text_y))
-
     while game_over:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -336,8 +350,8 @@ while running:
 
         game_over_text = font.render("You got hit!", True, (255, 0, 0))
         game_over_text2 = font.render("Press R to play again.", True, (0, 0, 0))
-        window.blit(game_over_text, (400 - game_over_text.width / 2, 300))
-        window.blit(game_over_text2, (400 - game_over_text2.width / 2, 330))
+        window.blit(game_over_text, (400 - game_over_text.get_width() / 2, 300))
+        window.blit(game_over_text2, (400 - game_over_text2.get_width() / 2, 330))
         pygame.display.update()
 
     pygame.display.update()
